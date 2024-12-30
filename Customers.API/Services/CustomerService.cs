@@ -17,13 +17,7 @@ namespace Customers.API.Services
         {
             try
             {
-                _dbContext.Customers.Remove(
-                    new Customer
-                    {
-                        Id = id
-                    }
-                );
-
+                _dbContext.Customers.Remove(new Customer { Id = id });
                 return await _dbContext.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
@@ -36,16 +30,32 @@ namespace Customers.API.Services
 
         public Task<Customer> FindOneAsync(int id) => _dbContext.Customers.FirstOrDefaultAsync(x => x.Id == id);
 
-        public Task<int> InsertAsync(Customer customer)
+        public async Task<int> InsertAsync(Customer customer)
         {
+            if (string.IsNullOrWhiteSpace(customer.Name) ||
+                string.IsNullOrWhiteSpace(customer.Email) ||
+                string.IsNullOrWhiteSpace(customer.Phone) ||
+                string.IsNullOrWhiteSpace(customer.Address))
+            {
+                throw new ArgumentException("All fields (Name, Email, Phone, Address) are required.");
+            }
+
             _dbContext.Add(customer);
-            return _dbContext.SaveChangesAsync();
+            return await _dbContext.SaveChangesAsync();
         }
 
         public async Task<int> UpdateAsync(Customer customer)
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(customer.Name) ||
+                    string.IsNullOrWhiteSpace(customer.Email) ||
+                    string.IsNullOrWhiteSpace(customer.Phone) ||
+                    string.IsNullOrWhiteSpace(customer.Address))
+                {
+                    throw new ArgumentException("All fields (Name, Email, Phone, Address) are required.");
+                }
+
                 _dbContext.Update(customer);
                 return await _dbContext.SaveChangesAsync();
             }
@@ -54,5 +64,7 @@ namespace Customers.API.Services
                 return 0;
             }
         }
+
+
     }
 }
